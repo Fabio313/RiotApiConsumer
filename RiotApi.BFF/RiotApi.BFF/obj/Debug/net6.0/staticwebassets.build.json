@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "WW54t1wrZJ1xpx0D7fksCnFqJZgwRuZM+S/BWxMWf78=",
+  "Source": "RiotApi.BFF",
+  "BasePath": "_content/RiotApi.BFF",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}
