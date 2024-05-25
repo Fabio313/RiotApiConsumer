@@ -1,5 +1,9 @@
 import 'dart:convert';
+import 'dart:html';
+import 'dart:js_util';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
 
 void main() {
@@ -69,6 +73,8 @@ class DetailScreen extends StatefulWidget {
 
 class _DetailScreenState extends State<DetailScreen> {
   String puuid = "";
+  Image profileImage = Image.network('');
+  List<Image> championsImages = List<Image>.empty(growable: true);
   String gameName = "";
   String tagLine = "";
 
@@ -84,19 +90,26 @@ class _DetailScreenState extends State<DetailScreen> {
       gameName = splitedInfo[0];
       tagLine = splitedInfo[1];
 
-      final response = await http.get(
+      final riotResponse = await http.get(
         Uri.parse(
-            "https://americas.api.riotgames.com/riot/account/v1/accounts/by-riot-id/$gameName/$tagLine"),
+            "https://localhost:7155/api/v1/lol/getInformations?gameName=$gameName&gameTag=$tagLine"),
         headers: {
           'Content-Type': 'application/json',
           'X-Riot-Token': 'RGAPI-d1c486f4-184f-4859-9715-60186e845b3c'
         },
       );
-      final responseData = json.decode(response.body);
+      final responseData = json.decode(riotResponse.body);
 
       setState(() {
-        if (response.statusCode == 200 && responseData) {
-          puuid = responseData.puuid;
+        if (riotResponse.statusCode == 200 && responseData != null) {
+          puuid = responseData['account']['puuid'];
+          profileImage = Image.network(
+              'https://ddragon.leagueoflegends.com/cdn/14.9.1/img/profileicon/${responseData['summoner']['profileIconId']}.png');
+
+          for (var maestry in responseData['topMaesterys']) {
+            championsImages.add(Image.network(
+                'https://ddragon.leagueoflegends.com/cdn/14.9.1/img/champion/${maestry['championName']}.png'));
+          }
         }
       });
     } catch (e) {
@@ -120,9 +133,17 @@ class _DetailScreenState extends State<DetailScreen> {
               style: TextStyle(fontSize: 20),
             ),
             SizedBox(height: 20),
-            Text(
-              puuid,
-              style: TextStyle(fontSize: 20, color: Colors.red),
+            profileImage,
+            Expanded(
+              child: GridView.builder(
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3,
+                ),
+                itemCount: championsImages.length,
+                itemBuilder: (context, index) {
+                  return championsImages[index];
+                },
+              ),
             ),
           ],
         ),
